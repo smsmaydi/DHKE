@@ -1,0 +1,454 @@
+:root {
+  --bg: #1a1b26;
+  --surface: #24283b;
+  --border: #414868;
+  --text: #c0caf5;
+  --text-muted: #a9b1d6;
+  --accent-alice: #7aa2f7;
+  --accent-bob: #9ece6a;
+  --eve-color: #bb9af7;
+  --danger: #f7768e;
+  --success: #9ece6a;
+  --radius: 8px;
+  --shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+.app {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1rem 1rem 3rem;
+  position: relative;
+}
+
+/* Eye icon - top left */
+.visibility-toggle {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s, border-color 0.2s;
+}
+.visibility-toggle:hover {
+  background: #32364a;
+  border-color: var(--accent-alice);
+}
+.visibility-toggle:focus {
+  outline: 2px solid var(--accent-alice);
+  outline-offset: 2px;
+}
+.visibility-toggle .icon-eye-closed { display: none !important; }
+.visibility-toggle .icon-eye-open { display: block; }
+.visibility-toggle.hidden .icon-eye-open { display: none !important; }
+.visibility-toggle.hidden .icon-eye-closed { display: block !important; }
+
+.header {
+  text-align: center;
+  padding-top: 2.5rem;
+  padding-bottom: 0.5rem;
+}
+.header h1 {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+.subtitle {
+  margin: 0.25rem 0 0;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+/* Eve figure */
+.eve-figure {
+  text-align: center;
+  margin: 0.5rem 0 1rem;
+}
+.eve-svg {
+  width: 60px;
+  height: 75px;
+}
+.eve-figure figcaption {
+  font-size: 0.85rem;
+  color: var(--eve-color);
+  margin-top: 0.25rem;
+}
+
+/* Common parameters */
+.common-params {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
+  box-shadow: var(--shadow);
+}
+.common-params h2 {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.public-badge {
+  font-size: 0.8rem;
+  color: var(--accent-alice);
+  font-weight: 500;
+}
+.prime-badge {
+  font-size: 0.75rem;
+  margin-left: 0.5rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+}
+.prime-badge.prime { background: rgba(158, 206, 106, 0.2); color: var(--success); }
+.prime-badge.not-prime { background: rgba(247, 118, 142, 0.2); color: var(--danger); }
+.input-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.input-row:last-child { margin-bottom: 0; }
+.input-row label { min-width: 2rem; }
+.input-row input {
+  width: 80px;
+  padding: 0.4rem 0.5rem;
+  font-size: 1rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+}
+.input-row input:focus {
+  outline: none;
+  border-color: var(--accent-alice);
+}
+
+/* Playback bar - only when calculations visible */
+.playback-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+  padding: 0.5rem 0;
+}
+.playback-bar button {
+  padding: 0.4rem 0.65rem;
+  font-size: 0.85rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  cursor: pointer;
+}
+.playback-bar button:hover:not(:disabled) {
+  background: #32364a;
+  border-color: var(--accent-alice);
+}
+.playback-bar button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.playback-bar .play-pause {
+  background: var(--accent-alice);
+  color: var(--bg);
+  border-color: var(--accent-alice);
+}
+.step-indicator {
+  margin-left: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* Random keys bar - only when calculations hidden */
+.random-keys-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+  padding: 0.5rem 0;
+}
+.random-keys-btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  background: var(--accent-bob);
+  color: var(--bg);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.random-keys-btn:hover {
+  filter: brightness(1.1);
+}
+.random-keys-hint {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* Exchange area */
+.exchange-area {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: start;
+  margin-bottom: 1.5rem;
+}
+
+.side {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 1rem;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+.alice-side { border-top: 3px solid var(--accent-alice); }
+.bob-side { border-top: 3px solid var(--accent-bob); }
+
+.side h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+}
+.alice-side h3 { color: var(--accent-alice); }
+.bob-side h3 { color: var(--accent-bob); }
+
+.field {
+  margin-bottom: 0.75rem;
+  position: relative;
+}
+.field label {
+  display: block;
+  font-size: 0.85rem;
+  margin-bottom: 0.25rem;
+  color: var(--text-muted);
+}
+.field input.private-input {
+  width: 100%;
+  padding: 0.4rem 0.5rem;
+  font-size: 1rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+}
+.field .masked-value {
+  position: absolute;
+  left: 0.5rem;
+  top: 1.85rem;
+  font-size: 1rem;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  pointer-events: none;
+  display: none;
+}
+.app.hidden .field .private-input { color: transparent; caret-color: var(--text); }
+.app.hidden .field .masked-value { display: inline; }
+
+.calc-box {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.75rem;
+  min-height: 2.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.calc-box .calc-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 0.2rem;
+}
+.calc-box code {
+  font-size: 0.9rem;
+  word-break: break-all;
+}
+.calc-box:not(.visible) code { color: var(--text-muted); }
+.calc-box.step-active { border-color: #9ece6a; box-shadow: 0 0 0 2px rgba(158, 206, 106, 0.3); }
+.app.hidden .calc-box code { visibility: hidden; }
+.app.hidden .calc-box .calc-label { visibility: hidden; }
+.app.hidden .calc-box { color: transparent; }
+
+.arrow-slot { margin-bottom: 0.5rem; }
+.arrow-slot .arrow-hint {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 0.2rem;
+}
+.arrow-value { font-weight: 600; }
+.arrow-slot.exchange-arrow.animating {
+  animation: pulse-arrow 1.2s ease-in-out 2;
+}
+@keyframes pulse-arrow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; background: rgba(122, 162, 247, 0.1); border-radius: 4px; }
+}
+
+.middle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 2rem;
+}
+.middle.step-active .arrow-cross {
+  border: 2px solid #9ece6a;
+  padding: 0.5rem;
+  border-radius: var(--radius);
+  background: rgba(158, 206, 106, 0.08);
+}
+.middle.exchange-animate {
+  animation: highlight-exchange 1.5s ease-in-out 1;
+}
+@keyframes highlight-exchange {
+  0%, 100% { transform: scale(1); }
+  30% { transform: scale(1.02); }
+  60% { transform: scale(1.02); }
+}
+.middle.exchange-animate .arrow-cross {
+  padding: 0.5rem;
+  border-radius: var(--radius);
+  background: rgba(122, 162, 247, 0.08);
+  border: 1px solid rgba(122, 162, 247, 0.3);
+}
+.arrow-cross {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+.arrow-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: center;
+}
+.arrow-label { color: var(--text-muted); font-size: 0.8rem; }
+.arrow-value { font-weight: 600; }
+.step-description {
+  margin: 0.6rem 0 0;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9rem;
+  color: var(--text);
+  text-align: center;
+  background: rgba(158, 206, 106, 0.08);
+  border-radius: 4px;
+  border-left: 3px solid #9ece6a;
+  line-height: 1.4;
+}
+.public-key-note {
+  margin: 0.35rem 0 0;
+  font-size: 0.8rem;
+  color: var(--accent-alice);
+  font-style: italic;
+}
+
+/* Shared secret box */
+.shared-secret-section {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+.shared-secret-box {
+  display: inline-flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.25rem;
+  background: var(--surface);
+  border: 2px solid var(--accent-alice);
+  border-radius: var(--radius);
+  padding: 0.75rem 1.25rem;
+  font-size: 1.1rem;
+  box-shadow: var(--shadow);
+}
+.shared-secret-box.step-active { border-color: #9ece6a; box-shadow: 0 0 0 2px rgba(158, 206, 106, 0.3); }
+.shared-secret-value { font-weight: 700; color: var(--success); }
+.shared-secret-section:not(.visible) .shared-secret-value { color: var(--text-muted); }
+.shared-secret-masked {
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  display: none;
+}
+.app.hidden .shared-secret-value { display: none; }
+.app.hidden .shared-secret-masked { display: inline; }
+.shared-secret-label { color: var(--text-muted); }
+
+.visibility-hint {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+.visible-mode-only { display: block; }
+.hidden-mode-only { display: none; }
+.app.hidden .visible-mode-only { display: none; }
+.app.hidden .hidden-mode-only { display: block; }
+
+/* Guess section */
+.guess-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  box-shadow: var(--shadow);
+}
+.guess-section h3 { margin: 0 0 0.5rem; font-size: 1rem; }
+.guess-section p { margin: 0 0 0.75rem; font-size: 0.9rem; color: var(--text-muted); }
+.guess-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.guess-row label { font-size: 0.9rem; }
+.guess-row input {
+  width: 100px;
+  padding: 0.4rem 0.5rem;
+  font-size: 1rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+}
+.guess-row button {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  background: var(--accent-alice);
+  color: var(--bg);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.guess-row button:hover { filter: brightness(1.1); }
+.guess-feedback {
+  margin: 0.5rem 0 0;
+  font-size: 0.9rem;
+  min-height: 1.5em;
+}
+.guess-feedback.correct { color: var(--success); font-weight: 600; }
+.guess-feedback.wrong { color: var(--danger); }
