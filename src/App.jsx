@@ -161,18 +161,6 @@ export default function App() {
         <p className="subtitle">Diffie–Hellman Key Exchange Simulation</p>
       </header>
 
-      <figure className="eve-figure" aria-hidden="true">
-        <svg viewBox="0 0 80 100" className="eve-svg">
-          <circle cx="40" cy="18" r="12" fill="var(--eve-color)" />
-          <line x1="40" y1="30" x2="40" y2="55" stroke="var(--eve-color)" strokeWidth="2" />
-          <line x1="40" y1="40" x2="20" y2="70" stroke="var(--eve-color)" strokeWidth="2" />
-          <line x1="40" y1="40" x2="60" y2="70" stroke="var(--eve-color)" strokeWidth="2" />
-          <line x1="40" y1="55" x2="25" y2="95" stroke="var(--eve-color)" strokeWidth="2" />
-          <line x1="40" y1="55" x2="55" y2="95" stroke="var(--eve-color)" strokeWidth="2" />
-        </svg>
-        <figcaption>Eve</figcaption>
-      </figure>
-
       <section className="common-params" aria-label="Common parameters">
         <h2>(Student input) — <span className="public-badge">g and p are public</span></h2>
         <div className="input-row">
