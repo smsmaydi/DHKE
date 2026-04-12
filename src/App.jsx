@@ -5,6 +5,17 @@ import { computeDHKE, isPrime } from './utils/dhke'
 const STEPS = 4
 /** Delay in ms between automatic step advances when Play is active. */
 const PLAY_INTERVAL_MS = 2200
+/** localStorage key for light / dark theme (must match index.html boot script). */
+const THEME_STORAGE_KEY = 'dhke-theme'
+
+function readStoredTheme() {
+  if (typeof window === 'undefined') return 'light'
+  try {
+    return window.localStorage.getItem(THEME_STORAGE_KEY) === 'dark' ? 'dark' : 'light'
+  } catch {
+    return 'light'
+  }
+}
 
 /**
  * Parses a value as integer and clamps to a minimum; returns fallback if invalid or below min.
@@ -37,7 +48,18 @@ export default function App() {
   const [playing, setPlaying] = useState(false)
   const [guess, setGuess] = useState('')
   const [guessFeedback, setGuessFeedback] = useState({ text: '', correct: null })
+  const [colorMode, setColorMode] = useState(readStoredTheme)
   const playIntervalRef = useRef(null)
+
+  // Keep <html data-theme> and localStorage in sync with the toggle (professor feedback: dark mode).
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', colorMode)
+    try {
+      window.localStorage.setItem(THEME_STORAGE_KEY, colorMode)
+    } catch {
+      /* ignore quota / private mode */
+    }
+  }, [colorMode])
 
   const params = useMemo(() => ({
     g: Math.max(2, clampNum(g, 2, 3)),
@@ -119,11 +141,12 @@ export default function App() {
   const step2Active = !hidden && step === 2
   const step3Active = !hidden && step === 3
 
+  // Short copy so the middle column stays compact (fits one viewport without scrolling).
   const stepDescriptions = [
-    'Enter g, p and private keys (a, b). Use Play or Next to start.',
-    'Alice and Bob compute their public keys: A = g^a mod p, B = g^b mod p',
-    'Public keys exchanged over the network.',
-    'Both compute the shared secret: B^a mod p = A^b mod p',
+    'Enter g, p, a, b — then Play or Next.',
+    'Public keys: A = g^a mod p, B = g^b mod p.',
+    'A and B are exchanged publicly on the network.',
+    'Shared secret: B^a mod p = A^b mod p.',
   ]
   const stepNote = !hidden ? stepDescriptions[step] : null
 
@@ -134,8 +157,37 @@ export default function App() {
     })
   }
 
+  /*
+   * Layout: controls-strip keeps g/p inputs and playback (or random keys) on one horizontal band
+   * so typical laptop viewports avoid vertical scrolling (feedback from demo / presentation use).
+   */
   return (
     <div className={`app ${hidden ? 'hidden' : ''}`}>
+      <div
+        className="theme-toggles"
+        role="group"
+        aria-label="Color theme"
+      >
+        <button
+          type="button"
+          className={colorMode === 'light' ? 'active' : ''}
+          onClick={() => setColorMode('light')}
+          aria-pressed={colorMode === 'light'}
+          title="Light background (default)"
+        >
+          Light
+        </button>
+        <button
+          type="button"
+          className={colorMode === 'dark' ? 'active' : ''}
+          onClick={() => setColorMode('dark')}
+          aria-pressed={colorMode === 'dark'}
+          title="Dark background"
+        >
+          Dark
+        </button>
+      </div>
+
       <button
         type="button"
         className={`visibility-toggle ${hidden ? 'hidden' : ''}`}
@@ -143,80 +195,87 @@ export default function App() {
         title={hidden ? 'Show calculations' : 'Hide calculations'}
         aria-label={hidden ? 'Show calculations' : 'Hide calculations'}
       >
-        <svg className="icon-eye-open" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg className="icon-eye-open" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
           <circle cx="12" cy="12" r="3" />
         </svg>
-        <svg className="icon-eye-closed" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg className="icon-eye-closed" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
           <line x1="1" y1="1" x2="23" y2="23" />
         </svg>
         <span className="visibility-label">
-          {hidden ? 'Show Calculations' : 'Hide Calculations'}
+          {hidden ? 'Show' : 'Hide'}
         </span>
       </button>
 
       <header className="header">
         <h1>DHKE</h1>
-        <p className="subtitle">Diffie–Hellman Key Exchange Simulation</p>
+        <p className="subtitle">Diffie–Hellman Key Exchange</p>
       </header>
 
-      <section className="common-params" aria-label="Common parameters">
-        <h2>(Student input) — <span className="public-badge">g and p are public</span></h2>
-        <div className="input-row">
-          <label htmlFor="input-g"><code>g:</code></label>
-          <input
-            type="number"
-            id="input-g"
-            min={2}
-            value={g}
-            onChange={(e) => setG(e.target.value)}
-          />
-          <span className={`prime-badge ${gPrime ? 'prime' : 'not-prime'}`}>
-            {gPrime ? 'prime' : 'not prime'}
-          </span>
-        </div>
-        <div className="input-row">
-          <label htmlFor="input-p"><code>p:</code></label>
-          <input
-            type="number"
-            id="input-p"
-            min={2}
-            value={p}
-            onChange={(e) => setP(e.target.value)}
-          />
-          <span className={`prime-badge ${pPrime ? 'prime' : 'not-prime'}`}>
-            {pPrime ? 'prime' : 'not prime'}
-          </span>
-        </div>
-      </section>
+      {/* Single horizontal strip: public parameters + playback (or random keys) to reduce vertical scroll */}
+      <div className="controls-strip">
+        <section className="common-params" aria-label="Common parameters">
+          <h2 className="common-params-title">
+            <span className="public-badge">g, p public</span>
+          </h2>
+          <div className="params-inline">
+            <div className="input-row">
+              <label htmlFor="input-g"><code>g</code></label>
+              <input
+                type="number"
+                id="input-g"
+                min={2}
+                value={g}
+                onChange={(e) => setG(e.target.value)}
+              />
+              <span className={`prime-badge ${gPrime ? 'prime' : 'not-prime'}`}>
+                {gPrime ? 'prime' : 'not prime'}
+              </span>
+            </div>
+            <div className="input-row">
+              <label htmlFor="input-p"><code>p</code></label>
+              <input
+                type="number"
+                id="input-p"
+                min={2}
+                value={p}
+                onChange={(e) => setP(e.target.value)}
+              />
+              <span className={`prime-badge ${pPrime ? 'prime' : 'not-prime'}`}>
+                {pPrime ? 'prime' : 'not prime'}
+              </span>
+            </div>
+          </div>
+        </section>
 
-      {!hidden && (
-        <div className="playback-bar">
-          <button type="button" onClick={goStart} title="Reset to start">⏮ First</button>
-          <button type="button" onClick={goPrev} disabled={step === 0} title="Previous step">◀ Prev</button>
-          <button
-            type="button"
-            className="play-pause"
-            onClick={() => setPlaying((p) => !p)}
-            title={playing ? 'Stop' : 'Play'}
-          >
-            {playing ? '⏹ Stop' : '▶ Play'}
-          </button>
-          <button type="button" onClick={goNext} disabled={step >= STEPS - 1} title="Next step">Next ▶</button>
-          <button type="button" onClick={goFinish} disabled={step >= STEPS - 1} title="Go to end">Finish ⏭</button>
-          <span className="step-indicator">Step {step + 1} / {STEPS}</span>
-        </div>
-      )}
+        {!hidden && (
+          <div className="playback-bar" role="toolbar" aria-label="Step playback">
+            <button type="button" onClick={goStart} title="First step" aria-label="First step">⏮</button>
+            <button type="button" onClick={goPrev} disabled={step === 0} title="Previous step" aria-label="Previous step">◀</button>
+            <button
+              type="button"
+              className="play-pause"
+              onClick={() => setPlaying((p) => !p)}
+              title={playing ? 'Stop' : 'Play'}
+              aria-label={playing ? 'Stop' : 'Play'}
+            >
+              {playing ? '⏹' : '▶'}
+            </button>
+            <button type="button" onClick={goNext} disabled={step >= STEPS - 1} title="Next step" aria-label="Next step">▶</button>
+            <button type="button" onClick={goFinish} disabled={step >= STEPS - 1} title="Finish" aria-label="Finish">⏭</button>
+            <span className="step-indicator" aria-live="polite">Step {step + 1}/{STEPS}</span>
+          </div>
+        )}
 
-      {hidden && (
-        <div className="random-keys-bar">
-          <button type="button" className="random-keys-btn" onClick={handleRandomKeys}>
-            Random keys (1–100)
-          </button>
-          <span className="random-keys-hint">Assign random private keys to Alice and Bob.</span>
-        </div>
-      )}
+        {hidden && (
+          <div className="random-keys-bar">
+            <button type="button" className="random-keys-btn" onClick={handleRandomKeys} title="Random private keys for Alice and Bob (1–100)">
+              Random a, b (1–100)
+            </button>
+          </div>
+        )}
+      </div>
 
       <main className="exchange-area">
         <div className="side alice-side">
@@ -239,7 +298,7 @@ export default function App() {
           </div>
           <div className={`arrow-slot exchange-arrow ${showExchange ? 'animating' : ''}`}>
             <span className="arrow-value">{showPublicKeysToEve ? result.B : '?'}</span>
-            <span className="arrow-hint">received from Bob (public)</span>
+            <span className="arrow-hint">from Bob (public)</span>
           </div>
           <div className={`calc-box ${showSharedCalcs ? 'visible' : ''} ${step3Active ? 'step-active' : ''}`}>
             <span className="calc-label">Shared secret: B<sup>a</sup> mod p</span>
@@ -281,7 +340,7 @@ export default function App() {
           </div>
           <div className={`arrow-slot exchange-arrow ${showExchange ? 'animating' : ''}`}>
             <span className="arrow-value">{showPublicKeysToEve ? result.A : '?'}</span>
-            <span className="arrow-hint">received from Alice (public)</span>
+            <span className="arrow-hint">from Alice (public)</span>
           </div>
           <div className={`calc-box ${showSharedCalcs ? 'visible' : ''} ${step3Active ? 'step-active' : ''}`}>
             <span className="calc-label">Shared secret: A<sup>b</sup> mod p</span>
@@ -294,29 +353,25 @@ export default function App() {
         <div className={`shared-secret-box ${step3Active ? 'step-active' : ''}`}>
           <span className="shared-secret-value">{showSharedCalcs ? result.shared : '—'}</span>
           <span className="shared-secret-masked" aria-hidden="true">**</span>
-          <span className="shared-secret-label"> is now their shared secret (private key).</span>
+          <span className="shared-secret-label"> shared secret</span>
         </div>
         <div className="visibility-hint hidden-mode-only">
-          Alice and Bob&apos;s private keys can be thought of as random; calculations are hidden.
+          Private values hidden — guess the shared secret from g, p, A, B.
         </div>
         <div className="visibility-hint visible-mode-only">
-          Use Play / Next to step through the exchange. Click <strong>Hide</strong> to hide calculations.
+          Step with ▶ / ⏭ or use <strong>Hide</strong> for Eve view.
         </div>
       </section>
 
       {hidden && (
-        <section className="guess-section hidden-mode-only">
-          <h3>Guess the shared secret</h3>
-          <p>
-            As Eve, try to find the shared secret: only <code>g</code>, <code>p</code>, and the public keys (A, B) are visible.
-          </p>
+        <section className="guess-section hidden-mode-only" aria-label="Guess the shared secret">
           <div className="guess-row">
-            <label htmlFor="guess-input">Your guess (number):</label>
+            <span className="guess-inline-label">Guess shared secret:</span>
             <input
               type="number"
               id="guess-input"
               min={0}
-              placeholder="Enter number"
+              placeholder="?"
               value={guess}
               onChange={(e) => setGuess(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleGuess()}
